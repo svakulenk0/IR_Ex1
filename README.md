@@ -34,21 +34,22 @@ Normalize the vocabulary by applying any combination of the techniques described
 
 These options should be exposed as parameters in the index creation phase. 
 
-For the stemming and lemmatization components you can use a library at your choice.
-
 You should provide an executable indexer.sh file that given the necessary parameters generates the required index.
 
-You may use any format for storing the index.
 
 ## Search
 
-Implement a basic search functionality and provide it as a command line interface (CLI). The CLI allows the user to provide search parameters and a file with a topic to search for. The system then returns a list of documents ranked by a similarity function of your choice and based on a variant of term frequency ranking. Different components (e.g. scoring function) need to be exposed as parameters in the command line. TF-IDF and BM25 scoring methods have to be implemented.
+Implement a basic search functionality and provide it as a command line interface (CLI): provide search parameters and a file with a topic to search for.
 
-The search engine must take as a parameter the topic file. You are provided with a set of 50 top- ics to search for. They are all in the dataset (TREC8Adhoc.tar.bz2) and have a simple SGML structure. Each topic is delimited by <TOP> tags and you are free to use all or part of their content in your search.
+The system then returns a list of documents ranked by a similarity function of your choice and based on a variant of term frequency ranking. Different components (e.g. scoring function) need to be exposed as parameters in the command line.
 
-Try to implement topic processing and the actual scoring/ranking as two separate tasks. By topic processing we understand here simply getting the terms that will be search in the index. Consider the use or not use of the different elements in the topic document.
+TF-IDF and BM25 scoring methods have to be implemented.
 
-Your search should be (moderately) efficient. It is e.g. not ok to perform your collection indexing only at search time, and also loading the inverted index should be reasonably in time, or at least not happen before every search.
+The search engine must take as a parameter the topic file. You are provided with a set of 50 top- ics to search for. They are all in the dataset and have a simple SGML structure. Each topic is delimited by <TOP> tags and you are free to use all or part of their content in your search.
+
+Implement topic processing and the actual scoring/ranking as two separate tasks.
+
+By topic processing we understand here simply getting the terms that will be search in the index. Consider the use or not use of the different elements in the topic document.
 
 For each topic of the 50 provided, the result should be a ranked list of up to 1000 documents, where each line is in the following format:
 
@@ -106,20 +107,31 @@ your results file is your results file using the format indicated above, where a
 
 In the end, your results should be in a table.
 
-## Report (15%)
-Describing the prototype in a report. Describe briefly your index, in particular which additional information is required to be saved, if any. Show how the score is calculated for two documents adjacent in the ranked list. For this, you may use a query of your choosing (the simpler the query, the simpler the explanation, but you must have at least two terms in the query). Finally, show your MAP results calculated using trec eval. Try to find a justification of why a retrieval model performed better than the other. The report must explain how to run the prototype. 
+## Report
+
+Describe briefly your index, in particular which additional information is required to be saved, if any. Show how the score is calculated for two documents adjacent in the ranked list. For this, you may use a query of your choosing (the simpler the query, the simpler the explanation, but you must have at least two terms in the query).
+
+Finally, show your MAP results calculated using trec eval. Try to find a justification of why a retrieval model performed better than the other. 
+
+Explain how to run the prototype. 
 
 Maximum size: 4 pages or 2000 words.
 
 
-## Hand-in Presentation (15%)
-General knowledge about the system you have used will be tested (e.g. what a tokenizer is, which stemmer have you used, how to change it, how to change the scoring function, what are the language-specific features).
+## Hand-in Presentation
+
+General knowledge about the system (e.g. what a tokenizer is, which stemmer have you used, how to change it, how to change the scoring function, what are the language-specific features).
+
 • All the source code must be uploaded on a public Git and the coordinators invited (lupu@ifs.tuwien.ac.at and lipani@ifs.tuwien.ac.at);
+
 • Prototypes are presented to the coordinator in one of the labs;
-• Final deadline is April 28th (but you may hand-in earlier). For that you must upload a zipped file to TUWEL (report, source code, and corresponding executable jar file incl. all dependencies);
-• Your submission has to be self-contained;
+
+• Final deadline is April 28th: upload a zipped file to TUWEL (report, source code, and corresponding executable jar file incl. all dependencies);
+
 • You must book a time on TUWEL for the presentation;
+
 • You present on your own notebook to the coordinator in the lab;
+
 • Lab locations are on TISS.
 
 Note: 35 points to pass the course.
@@ -137,13 +149,8 @@ Note: 35 points to pass the course.
 # References
 
 
-* Inverted Index Python implementations:
+* Inverted Index Python implementation(https://github.com/willf/inverted_index)
 
-(https://github.com/willf/inverted_index)
-
-(https://github.com/matteobertozzi/blog-code/blob/master/py-inverted-index/invindex.py)
-
-* [Python: Inverted Index for dummies](http://th30z.blogspot.co.at/2010/10/python-inverted-index-for-dummies.html)
-
+* [Python: Inverted Index for dummies](http://th30z.blogspot.co.at/2010/10/python-inverted-index-for-dummies.html)(https://github.com/matteobertozzi/blog-code/blob/master/py-inverted-index/invindex.py)
 
 * (http://www.nltk.org/_modules/nltk/tokenize.html)
