@@ -33,13 +33,16 @@ class Index(object):
     lem <Bool> Set to True to apply lemmatization to all the tokens
     minToken <Int> Removes all the tokens with the length less than minToken
     '''
-    def __init__(self, lower=True, stem=False, lem=True, minToken=4):
+    def __init__(self, index_path=False, lower=True, stem=False, lem=True, minToken=4):
         self.inv_index = defaultdict(list)
         self.tokenizer = RegexpTokenizer(r'\w+')
         self.lower = lower
         self.stem = stem
         self.lem = lem
         self.minToken = minToken
+        # load pre-constructed index
+        if index_path:
+            self.load_inv_index(index_path)
 
     def tokenize(self, s):
         '''
@@ -109,28 +112,37 @@ class Index(object):
         with open(index_path, 'rb') as f:
             self.inv_index = pickle.load(f)
 
-    def search(self, q):
+    def search(self, query, AND=True):
         '''
-        Search index
+        Method to search documents in the inverted index
+        given a query
+
+        query <String>
         '''
-        pass
+        # preprocessing
+        tokens = self.tokenize(query)
+        wordlist = self.preprocess(tokens)
 
-    def tfidf(self):
-        pass
+        # find a set of documents for each word in the query
+        doc_has_word = [ (self.inv_index[word], word) for word in wordlist ]
 
-    def bm25(self):
-        pass
+        # if AND : AND query scenario
+        answer_set = set(doc_has_word[0][0])
+        for d, w in doc_has_word:
+            answer_set = answer_set & set(d)
+
+        return answer_set
 
 
 if __name__ == '__main__':
     # use the index of the TREC8 collection
-    index = Index()
+    index = Index(INDEX_PATH)
 
     # load collection and store into index
     # index.load_collection(TREC8_PATH, limit=20)
     # index.store_inv_index(INDEX_PATH)
 
-    # load index
-    index.load_inv_index(INDEX_PATH)
-    
-    # print index.inv_index
+    # search index
+    query = 'medications 0947'  # answer: 1
+    print index.search(query)
+
