@@ -13,7 +13,9 @@ Unittests for Index class
 
 import unittest
 
+import settings
 from index import Index
+from vectorize import VSM
 
 
 DOCS = ["""Niners head coach Mike Singletary will let Alex Smith remain his starting 
@@ -38,8 +40,18 @@ DOCS = ["""Niners head coach Mike Singletary will let Alex Smith remain his star
 class TestIndex(unittest.TestCase):
     def test_create_inv_index(self):
         index = Index()
-        index.create_inv_index(DOCS)
-        print index.inv_index
+        index.parse_strings(DOCS)
+        # print index.inv_index
+        assert 'coach' in index.inv_index
+
+    def test_create_index(self):
+        index = Index()
+        index.load_collection(settings.TREC8_PATH, limit=2)
+
+
+class TestVSM():
+    def test_vectorize(self):
+        vsm = VSM(DOCS)
 
 if __name__ == '__main__':
     unittest.main()
