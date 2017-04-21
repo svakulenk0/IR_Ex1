@@ -19,9 +19,7 @@ import re
 # from nltk.tokenize import word_tokenize
 from nltk.tokenize import RegexpTokenizer
 
-
-TREC8_PATH = 'TREC8all/Adhoc'
-INDEX_PATH = 'index_TREC8'
+import settings
 
 
 class Index(object):
@@ -34,6 +32,7 @@ class Index(object):
     minToken <Int> Removes all the tokens with the length less than minToken
     '''
     def __init__(self, index_path=False, lower=True, stem=False, lem=True, minToken=4):
+        self.index = defaultdict(list)
         self.inv_index = defaultdict(list)
         self.tokenizer = RegexpTokenizer(r'\w+')
         self.lower = lower
@@ -53,6 +52,7 @@ class Index(object):
         '''
         # return string.split(' ')
         # return word_tokenize(s)
+        # print s
         return self.tokenizer.tokenize(s)
 
     def preprocess(self, tokens):
@@ -66,7 +66,7 @@ class Index(object):
         # TODO stem and lem
         return tokens
 
-    def load_collection(self, path, limit):
+    def load_collection(self, path, limit, inverted=True):
         '''
         Load document collection, e.g. CD4&5 of the TIPSTER collection.
         '''
@@ -79,24 +79,31 @@ class Index(object):
                         text = doc.read()
                         text = self.parse_trec(text)
                         docid += 1
-                        self.create_inv_index(text, docid)
+                        self.create_index(text, docid, inverted=True)
 
     def parse_trec(self, text):
         '''Removes XML tags from the document text'''
         return re.sub('<[^>]*>', '', text)
 
-    def create_inv_index(self, text, docid):
+    def parse_strings(self, list_of_strings):
+        docid = 0
+        for string in list_of_strings:
+            docid += 1
+            self.create_index(string, docid)
+
+    def create_index(self, text, docid, inverted=True):
         '''
         Builds an inverted index
-
-        data <List> list of tokens to be indexed
         '''
         # for i, text in enumerate(docs):
         tokens = self.tokenize(text)
         tokens = self.preprocess(tokens)
         print 'Document', docid, ':', tokens[:10]
-        for token in tokens:
-            self.inv_index[token].append(docid)
+        # bow model
+        self.index[docid] = tokens
+        if inverted:
+            for token in tokens:
+                self.inv_index[token].append(docid)
 
     def store_inv_index(self, index_path):
         '''
@@ -125,24 +132,24 @@ class Index(object):
 
         # find a set of documents for each word in the query
         doc_has_word = [ (self.inv_index[word], word) for word in wordlist ]
+        print doc_has_word
 
         # if AND : AND query scenario
-        answer_set = set(doc_has_word[0][0])
-        for d, w in doc_has_word:
-            answer_set = answer_set & set(d)
+        # answer_set = set(doc_has_word[0][0])
+        # for d, w in doc_has_word:
+        #     answer_set = answer_set & set(d)
 
-        return answer_set
+        # return answer_set
 
 
 if __name__ == '__main__':
     # use the index of the TREC8 collection
-    index = Index(INDEX_PATH)
+    index = Index(settings.INDEX_PATH)
 
     # load collection and store into index
-    # index.load_collection(TREC8_PATH, limit=20)
-    # index.store_inv_index(INDEX_PATH)
+    # index.load_collection(settings.TREC8_PATH, limit=20)
+    # index.store_inv_index(settings.INDEX_PATH)
 
     # search index
     query = 'medications 0947'  # answer: 1
     print index.search(query)
-
