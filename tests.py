@@ -37,21 +37,46 @@ DOCS = ["""Niners head coach Mike Singletary will let Alex Smith remain his star
         """
         ]
 
+QUERY = 'medications 0947'
+
+
 class TestIndex(unittest.TestCase):
+    doc_limit = 2
+
     def test_create_inv_index(self):
         index = Index()
-        index.parse_strings(DOCS)
-        # print index.inv_index
+        index.create_index(list_of_strings=DOCS)
+        print index.inv_index
         assert 'coach' in index.inv_index
+        assert 'N_DOCS' in index.inv_index
+        print "Added", index.inv_index['N_DOCS'], "docs to the index"
+        assert index.inv_index['N_DOCS'] == len(DOCS)
 
-    def test_create_index(self):
+    def test_parse_trec8(self):
+        # create new index of the TREC8 collection
         index = Index()
-        index.load_collection(settings.TREC8_PATH, limit=2)
+        # load collection and store into index
+        index.create_index(path=settings.TREC8_PATH, limit=self.doc_limit)
+        index.store_inv_index(settings.INDEX_PATH)
+        assert 'N_DOCS' in index.inv_index
+        print "Added", index.inv_index['N_DOCS'], "docs to the index"
+        assert index.inv_index['N_DOCS'] == self.doc_limit
+
+    def test_OR_search(self):
+        index = Index(settings.INDEX_PATH)
+        # search index
+        # assert index.search(QUERY) == set([1, 2, 7, 12])
+
+    def test_AND_search(self):
+        index = Index(settings.INDEX_PATH)
+        # search index
+        # assert index.search(QUERY, AND=True) == set([1])
 
 
 class TestVSM():
     def test_vectorize(self):
         vsm = VSM(DOCS)
+
 
 if __name__ == '__main__':
     unittest.main()
