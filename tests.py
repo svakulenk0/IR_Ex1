@@ -62,15 +62,13 @@ class TestIndex(unittest.TestCase):
         print "Added", index.inv_index['N_DOCS'], "docs to the index"
         assert index.inv_index['N_DOCS'] == self.doc_limit
 
-    def test_OR_search(self):
+    def test_search(self):
+        # use the pre-computed index of the TREC8 collection
         index = Index(settings.INDEX_PATH)
         # search index
-        # assert index.search(QUERY) == set([1, 2, 7, 12])
-
-    def test_AND_search(self):
-        index = Index(settings.INDEX_PATH)
-        # search index
-        # assert index.search(QUERY, AND=True) == set([1])
+        query = 'medications 0947'
+        # verify tfidf ranking results
+        assert index.search(query) == {1: 0.6931471805599453, 2: 0.0}
 
 
 class TestVSM():

@@ -20,6 +20,7 @@ import re
 from nltk.tokenize import RegexpTokenizer
 
 import settings
+from scorer import TFIDF
 
 
 class Index(object):
@@ -152,11 +153,21 @@ class Index(object):
         '''
         # preprocessing
         tokens = self.tokenize(query)
-        wordlist = self.preprocess(tokens)
+        terms = self.preprocess(tokens)
 
         # find a set of documents for each word in the query
-        doc_has_word = [ (self.inv_index[word], word) for word in wordlist ]
-        print doc_has_word
+        # doc_has_term = [(self.inv_index[term], term) for term in terms]
+        # print doc_has_term
+
+        scorer = TFIDF()
+        for term in terms:
+            print term
+            # skip terms that are not indexed
+            if term in self.inv_index.keys():
+                # scorer.weight(term, [], self.inv_index['N_DOCS'])
+                print self.inv_index[term]
+                scorer.weight(term, self.inv_index[term], self.inv_index['N_DOCS'])
+        return scorer.ranking
 
         # answer_set = set(doc_has_word[0][0])
 
@@ -179,9 +190,4 @@ def parse_trec8():
 
 
 if __name__ == '__main__':
-    # use the pre-computed index of the TREC8 collection
-    index = Index(settings.INDEX_PATH)
-
-    # search index
-    query = 'medications 0947'
-    print index.search(query)
+    pass
