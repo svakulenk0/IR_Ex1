@@ -32,9 +32,9 @@ class Index(object):
     lem <Bool> Set to True to apply lemmatization to all the tokens
     minToken <Int> Removes all the tokens with the length less than minToken
     '''
-    def __init__(self, index_path=False, lower=True, stem=False, lem=True, minToken=4):
+    def __init__(self, index_path=False, length_path=False, lower=True, stem=False, lem=True, minToken=4):
         self.index = defaultdict(list)
-        self.inv_index = defaultdict(list)
+        
         self.tokenizer = RegexpTokenizer(r'\w+')  # word-level tokenizer
         self.lower = lower
         self.stem = stem
@@ -42,7 +42,13 @@ class Index(object):
         self.minToken = minToken
         # load pre-constructed index
         if index_path:
-            self.load_inv_index(index_path)
+            self.inv_index = self.load_dict(index_path)
+        else:
+            self.inv_index = defaultdict(list)
+        if length_path:
+            self.lds = self.load_dict(length_path)
+        else:
+            self.lds = defaultdict(list)
 
     def tokenize(self, s):
         '''
@@ -80,6 +86,9 @@ class Index(object):
         self.df()
         # store the number of docs in the collection N
         self.inv_index['N_DOCS'] = self.docid
+        # make sure all documents are processed and stored in both data structures
+        assert self.docid == len(self.lds)
+        self.lds['AVG_LD'] = sum([ld for ld in self.lds.values()])/self.docid
         # print self.inv_index
 
     def load_collection(self, path, limit, inverted=True):
@@ -110,6 +119,9 @@ class Index(object):
         '''
         # for i, text in enumerate(docs):
         tokens = self.tokenize(text)
+        # maintain dictionary with the length of documents
+        # length of the document = number of tokens
+        self.lds[self.docid] = len(tokens)
         token_counts = self.preprocess(tokens)
         print 'Document', self.docid, 'representation :', token_counts
         if inverted:
@@ -129,44 +141,56 @@ class Index(object):
             print doc_tfs
             self.inv_index[token]['df'] = sum([tf for doc, tf in doc_tfs.items()])
 
-    def store_inv_index(self, index_path):
+    def store_dict(self, path, dictionary):
         '''
-        Store the inverted index.
+        Store data on disk
         '''
-        with open(index_path, 'wb') as f:
-            pickle.dump(self.inv_index, f)
+        with open(path, 'wb') as f:
+            pickle.dump(dictionary, f)
 
-    def load_inv_index(self, index_path):
+    def load_dict(self, path):
         '''
-        Store the inverted index.
+        Load data from disk
         '''
-        with open(index_path, 'rb') as f:
-            self.inv_index = pickle.load(f)
+        dictionary = {}
+        with open(path, 'rb') as f:
+            dictionary = pickle.load(f)
+        print dictionary
+        return dictionary
 
-    def search(self, query, AND=False):
+    # def search(self, query, scorer, AND=False):
+    def search(self, query, scorer, AND=False):
         '''
         Method to search documents in the inverted index
         given a query: 
         1) return all the documents where the query terms appear (with the OR operator)
         2) rank each of the docs using the chosen weighting scheme
+        
+        Input:
+
         query <String>
+        scorer <Object> TFIDF or BM2b
+
         '''
         # preprocessing
         tokens = self.tokenize(query)
+        # counter for the term frequency of the term in the query
         terms = self.preprocess(tokens)
-
+        # print terms
         # find a set of documents for each word in the query
         # doc_has_term = [(self.inv_index[term], term) for term in terms]
         # print doc_has_term
-
-        scorer = TFIDF()
-        for term in terms:
+        # initialize the ranking
+        scorer.ranking = {}
+        # scorer = scoring_function()
+        for term, tfq in terms.items():
             print term
             # skip terms that are not indexed
             if term in self.inv_index.keys():
                 # scorer.weight(term, [], self.inv_index['N_DOCS'])
                 print self.inv_index[term]
-                scorer.weight(term, self.inv_index[term], self.inv_index['N_DOCS'])
+                # term posting tfq ndocs
+                scorer.rank_docs(term, self.inv_index[term], tfq, self.inv_index['N_DOCS'], self.lds)
         return scorer.ranking
 
         # answer_set = set(doc_has_word[0][0])
@@ -185,9 +209,10 @@ def parse_trec8():
     # create new index of the TREC8 collection
     index = Index()
     # load collection and store into index
-    index.create_index(path=settings.TREC8_PATH, limit=20)
-    index.store_inv_index(settings.INDEX_PATH)
+    index.create_index(path=settings.TREC8_PATH, limit=2)
+    index.store_dict(settings.INDEX_PATH, index.inv_index)
+    index.store_dict(settings.LENGTH_PATH, index.lds)
 
 
 if __name__ == '__main__':
-    pass
+    parse_trec8()
