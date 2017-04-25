@@ -30,6 +30,7 @@ class Scorer(object):
     # def tf(self, term, tokenized_document):
     #     return tokenized_document.count(term)
         # if posting:
+        # print posting
         for docid, tf in posting.items():
             # skip non-document placeholder for df
             if docid == 'df':
@@ -62,6 +63,7 @@ class TFIDF(Scorer):
     '''
     tfidf scoring 
     '''
+    name = 'tfidf'
     # def __init__(self):
 
     def calculate_score(self, tf, term, *args):
@@ -76,6 +78,8 @@ class TFIDF(Scorer):
 class BM25(Scorer):
     '''
     '''
+    name = 'bm25'
+
     def __init__(self, k2=100, k1=1.2, b=0.75):
         # weighted term frequencies for each term in the query
         self.tfqw = {}
@@ -89,6 +93,8 @@ class BM25(Scorer):
         k1, k2 and b are the hyper-parameters
         '''
         # print self.tfqw[term]
+        # weighted term frequencies for each term in the query
+        # + document length compared to the average doc length
         return self.tfqw[term] * tf / (self.k1 * (1 - self.b + self.b * self.ldws[docid]) + tf) * self.idfs[term]
 
 
