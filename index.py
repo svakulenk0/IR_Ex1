@@ -115,7 +115,7 @@ class Index(object):
                         for docno, text in docs:
                             self.docid += 1
                             self.add_to_index(text, docno, inverted=True)
-                            if self.docid >= limit:
+                            if limit and self.docid >= limit:
                                 return
                     except:
                         continue
@@ -236,14 +236,14 @@ class Index(object):
         # return answer_set
 
 
-def parse_trec8(ndocs=2):
+def parse_trec8(limit):
     # create new index of the TREC8 collection
     index = Index()
     # load collection and store into index
-    index.create_index(path=settings.TREC8_DOCS_PATH, limit=ndocs)
+    index.create_index(path=settings.TREC8_DOCS_PATH, limit=limit)
     index.store_dict(settings.INDEX_PATH, index.inv_index)
     index.store_dict(settings.LENGTH_PATH, index.lds)
 
 
 if __name__ == '__main__':
-    parse_trec8()
+    parse_trec8(limit=None)
