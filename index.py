@@ -18,9 +18,11 @@ from collections import defaultdict, Counter
 import re
 # from nltk.tokenize import word_tokenize
 from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
 
 import settings
 from scorer import TFIDF
+from trec_parser import parse_trec_doc
 
 
 class Index(object):
@@ -32,14 +34,15 @@ class Index(object):
     lem <Bool> Set to True to apply lemmatization to all the tokens
     minToken <Int> Removes all the tokens with the length less than minToken
     '''
-    def __init__(self, index_path=False, length_path=False, lower=True, stem=False, lem=True, minToken=4):
+    def __init__(self, index_path=False, length_path=False, lower=True, stem=False,
+                 lem=True, minToken=4, removeStopwords=True):
         self.index = defaultdict(list)
-        
         self.tokenizer = RegexpTokenizer(r'\w+')  # word-level tokenizer
         self.lower = lower
         self.stem = stem
         self.lem = lem
         self.minToken = minToken
+        self.removeStopwords = removeStopwords
         # load pre-constructed index
         if index_path:
             self.inv_index = self.load_dict(index_path)
@@ -72,6 +75,8 @@ class Index(object):
             tokens = [token.lower() for token in tokens]
         if self.minToken:
             tokens = [token for token in tokens if len(token) >= self.minToken]
+        if self.removeStopwords:
+            tokens = [token for token in tokens if token not in stopwords.words('english')]
         # TODO stem and lem ?
         return Counter(tokens)
 
@@ -99,13 +104,20 @@ class Index(object):
             for file in files:
                 if self.docid < limit:
                     with open(os.path.join(root, file), "r") as doc:
-                        text = doc.read()
-                        text = self.parse_trec(text)
-                        self.docid += 1
-                        self.add_to_index(text, inverted=True)
+                        xml = doc.read()
+                        try:
+                            docs = parse_trec_doc(xml)
+                            for docno, text in docs:
+                                self.docid += 1
+                                self.add_to_index(text, docno, inverted=True)
+                        except:
+                            continue
 
-    def parse_trec(self, text):
-        '''Removes XML tags from the document text'''
+    def parse_xml(self, text):
+        '''
+        Basic XML clean up:
+        Removes tags from the document text
+        '''
         return re.sub('<[^>]*>', '', text)
 
     def parse_strings(self, list_of_strings):
@@ -113,7 +125,7 @@ class Index(object):
             self.docid += 1
             self.add_to_index(string)
        
-    def add_to_index(self, text, inverted=True):
+    def add_to_index(self, text, docno, inverted=True):
         '''
         Builds an inverted index with tf(t,d) = f(t,d)
         '''
@@ -123,7 +135,8 @@ class Index(object):
         # length of the document = number of tokens
         self.lds[self.docid] = len(tokens)
         token_counts = self.preprocess(tokens)
-        print 'Document', self.docid, 'representation :', token_counts
+        # print 'Document', self.docid, 'representation :', token_counts.most_common(3)
+        print 'Document', docno, 'representation :', token_counts.most_common(3)
         if inverted:
             for token, count in token_counts.items():
                 if token not in self.inv_index:
@@ -138,7 +151,7 @@ class Index(object):
         Calculate and store document frequencies for each term at 'df' indices in the iverted index.
         '''
         for token, doc_tfs in self.inv_index.items():
-            print doc_tfs
+            # print doc_tfs
             self.inv_index[token]['df'] = sum([tf for doc, tf in doc_tfs.items()])
 
     def store_dict(self, path, dictionary):
@@ -155,10 +168,14 @@ class Index(object):
         dictionary = {}
         with open(path, 'rb') as f:
             dictionary = pickle.load(f)
-        print dictionary
+        # print dictionary
         return dictionary
 
     # def search(self, query, scorer, AND=False):
+    def search_topics(self, topic_path):
+        parse_topics(topic_path)
+        # self.search(query, scorer)
+
     def search(self, query, scorer, AND=False):
         '''
         Method to search documents in the inverted index
@@ -184,11 +201,11 @@ class Index(object):
         scorer.ranking = {}
         # scorer = scoring_function()
         for term, tfq in terms.items():
-            print term
+            # print term
             # skip terms that are not indexed
             if term in self.inv_index.keys():
                 # scorer.weight(term, [], self.inv_index['N_DOCS'])
-                print self.inv_index[term]
+                # print self.inv_index[term]
                 # term posting tfq ndocs
                 scorer.rank_docs(term, self.inv_index[term], tfq, self.inv_index['N_DOCS'], self.lds)
         return scorer.ranking
@@ -209,7 +226,7 @@ def parse_trec8():
     # create new index of the TREC8 collection
     index = Index()
     # load collection and store into index
-    index.create_index(path=settings.TREC8_PATH, limit=2)
+    index.create_index(path=settings.TREC8_DOCS_PATH, limit=2)
     index.store_dict(settings.INDEX_PATH, index.inv_index)
     index.store_dict(settings.LENGTH_PATH, index.lds)
 
