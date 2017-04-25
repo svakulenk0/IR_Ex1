@@ -19,6 +19,7 @@ import re
 # from nltk.tokenize import word_tokenize
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 
 import settings
 from scorer import TFIDF
@@ -38,6 +39,7 @@ class Index(object):
                  lem=True, minToken=4, removeStopwords=True):
         self.index = defaultdict(list)
         self.tokenizer = RegexpTokenizer(r'\w+')  # word-level tokenizer
+        self.lemmatizer = WordNetLemmatizer()
         self.lower = lower
         self.stem = stem
         self.lem = lem
@@ -77,7 +79,9 @@ class Index(object):
             tokens = [token for token in tokens if len(token) >= self.minToken]
         if self.removeStopwords:
             tokens = [token for token in tokens if token not in stopwords.words('english')]
-        # TODO stem and lem ?
+        if self.lem:
+            tokens = [self.lemmatizer.lemmatize(token) for token in tokens]
+        # TODO stem ?
         return Counter(tokens)
 
     def create_index(self, path=None, limit=None, list_of_strings=None):
@@ -102,16 +106,18 @@ class Index(object):
         '''
         for root, dirs, files in os.walk(path):
             for file in files:
-                if self.docid < limit:
-                    with open(os.path.join(root, file), "r") as doc:
-                        xml = doc.read()
-                        try:
-                            docs = parse_trec_doc(xml)
-                            for docno, text in docs:
-                                self.docid += 1
-                                self.add_to_index(text, docno, inverted=True)
-                        except:
-                            continue
+                
+                with open(os.path.join(root, file), "r") as doc:
+                    xml = doc.read()
+                    try:
+                        docs = parse_trec_doc(xml)
+                        for docno, text in docs:
+                            self.docid += 1
+                            self.add_to_index(text, docno, inverted=True)
+                            if self.docid >= limit:
+                                return
+                    except:
+                        continue
 
     def parse_xml(self, text):
         '''
@@ -123,7 +129,7 @@ class Index(object):
     def parse_strings(self, list_of_strings):
         for string in list_of_strings:
             self.docid += 1
-            self.add_to_index(string)
+            self.add_to_index(string, self.docid)
        
     def add_to_index(self, text, docno, inverted=True):
         '''
@@ -193,7 +199,7 @@ class Index(object):
         tokens = self.tokenize(query)
         # counter for the term frequency of the term in the query
         terms = self.preprocess(tokens)
-        # print terms
+        print terms
         # find a set of documents for each word in the query
         # doc_has_term = [(self.inv_index[term], term) for term in terms]
         # print doc_has_term
@@ -222,11 +228,11 @@ class Index(object):
         # return answer_set
 
 
-def parse_trec8():
+def parse_trec8(ndocs=2):
     # create new index of the TREC8 collection
     index = Index()
     # load collection and store into index
-    index.create_index(path=settings.TREC8_DOCS_PATH, limit=2)
+    index.create_index(path=settings.TREC8_DOCS_PATH, limit=ndocs)
     index.store_dict(settings.INDEX_PATH, index.inv_index)
     index.store_dict(settings.LENGTH_PATH, index.lds)
 
