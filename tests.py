@@ -16,6 +16,7 @@ import unittest
 import settings
 from index import Index
 from vectorize import VSM
+from scorer import BM25, TFIDF
 
 
 DOCS = ["""Niners head coach Mike Singletary will let Alex Smith remain his starting 
@@ -57,23 +58,50 @@ class TestIndex(unittest.TestCase):
         index = Index()
         # load collection and store into index
         index.create_index(path=settings.TREC8_PATH, limit=self.doc_limit)
-        index.store_inv_index(settings.INDEX_PATH)
+        index.store_dict(settings.INDEX_PATH, index.inv_index)
+        index.store_dict(settings.LENGTH_PATH, index.lds)
         assert 'N_DOCS' in index.inv_index
         print "Added", index.inv_index['N_DOCS'], "docs to the index"
         assert index.inv_index['N_DOCS'] == self.doc_limit
+        assert 'AVG_LD' in index.lds
+        print "Average document length:", index.lds['AVG_LD']
 
-    def test_search(self):
+    def test_load_collection(self):
+        index = Index(settings.INDEX_PATH, settings.LENGTH_PATH)
+        # print index.inv_index
+        assert 'N_DOCS' in index.inv_index
+        print "Added", index.inv_index['N_DOCS'], "docs to the index"
+        assert index.inv_index['N_DOCS'] == len(index.lds) - 1
+        assert 'AVG_LD' in index.lds
+        print "Average document length:", index.lds['AVG_LD']
+
+    def test_search_tfidf(self):
         # use the pre-computed index of the TREC8 collection
         index = Index(settings.INDEX_PATH)
         # search index
         query = 'medications 0947'
         # verify tfidf ranking results
-        assert index.search(query) == {1: 0.6931471805599453, 2: 0.0}
+        scorer = TFIDF()
+        print index.search(query, scorer)
+        # assert index.search(query) == {1: 0.6931471805599453, 2: 0.0}
+        assert index.search(query, scorer) == {1: 0.0, 2: -1.0986122886681098}
+        # assert index.search(query, scorer) == {1: 0.0, 2: -1.1}
+
+    def test_search_bm25(self):
+        # use the pre-computed index of the TREC8 collection
+        index = Index(settings.INDEX_PATH, settings.LENGTH_PATH)
+        # make sure doc length dict is loaded
+        assert index.lds
+        # search index
+        query = 'medications 0947'
+        # verify tfidf ranking results
+        scorer = BM25()
+        assert index.search(query, scorer) == {1: 0.0, 2: -0.004944249723978891}
 
 
-class TestVSM():
-    def test_vectorize(self):
-        vsm = VSM(DOCS)
+# class TestVSM():
+#     def test_vectorize(self):
+#         vsm = VSM(DOCS)
 
 
 if __name__ == '__main__':
