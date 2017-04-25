@@ -14,6 +14,7 @@ build an inverted index to search document collection.
 import os
 import pickle
 from collections import defaultdict, Counter
+import operator
 
 import re
 # from nltk.tokenize import word_tokenize
@@ -139,7 +140,7 @@ class Index(object):
         tokens = self.tokenize(text)
         # maintain dictionary with the length of documents
         # length of the document = number of tokens
-        self.lds[self.docid] = len(tokens)
+        self.lds[docno] = len(tokens)
         token_counts = self.preprocess(tokens)
         # print 'Document', self.docid, 'representation :', token_counts.most_common(3)
         print 'Document', docno, 'representation :', token_counts.most_common(3)
@@ -148,9 +149,9 @@ class Index(object):
                 if token not in self.inv_index:
                     self.inv_index[token] = {}
                 # tf = f
-                self.inv_index[token][self.docid] = count
+                self.inv_index[token][docno] = count
         else:
-            self.index[self.docid] = tokens
+            self.index[docno] = tokens
 
     def df(self):
         '''
@@ -158,7 +159,9 @@ class Index(object):
         '''
         for token, doc_tfs in self.inv_index.items():
             # print doc_tfs
-            self.inv_index[token]['df'] = sum([tf for doc, tf in doc_tfs.items()])
+            # self.inv_index[token]['df'] = sum([tf for doc, tf in doc_tfs.items()])
+            # number of docs in which the term appears
+            self.inv_index[token]['df'] = len(self.inv_index[token])
 
     def store_dict(self, path, dictionary):
         '''
@@ -194,12 +197,16 @@ class Index(object):
         query <String>
         scorer <Object> TFIDF or BM2b
 
+        Output:
+
+        returns document ranking sorted by the score
+
         '''
         # preprocessing
         tokens = self.tokenize(query)
         # counter for the term frequency of the term in the query
         terms = self.preprocess(tokens)
-        print terms
+        # print terms
         # find a set of documents for each word in the query
         # doc_has_term = [(self.inv_index[term], term) for term in terms]
         # print doc_has_term
@@ -214,7 +221,8 @@ class Index(object):
                 # print self.inv_index[term]
                 # term posting tfq ndocs
                 scorer.rank_docs(term, self.inv_index[term], tfq, self.inv_index['N_DOCS'], self.lds)
-        return scorer.ranking
+        # return document ranking sorted by the score
+        return sorted(scorer.ranking.items(), key=operator.itemgetter(1), reverse=True)
 
         # answer_set = set(doc_has_word[0][0])
 
