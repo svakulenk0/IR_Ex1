@@ -41,7 +41,10 @@ from index import Index
 from scorer import TFIDF, BM25
 
 
-def search_trec(scorer):
+def search_trec(scorer, top=1000):
+    '''
+    top <int> number of best scored docs returned
+    '''
     # parse topics/queries
     topics = parse_topics(settings.TREC8_TOPICS_PATH)
     # print topics
@@ -49,7 +52,7 @@ def search_trec(scorer):
     index = Index(settings.INDEX_PATH, settings.LENGTH_PATH)
     # print index.inv_index
     assert 'N_DOCS' in index.inv_index
-    print index.inv_index['N_DOCS'], "docs in the index"
+    print "Indexed:", index.inv_index['N_DOCS'], "docs"
     assert index.inv_index['N_DOCS'] == len(index.lds) - 1
     assert 'AVG_LD' in index.lds
     # print "Average document length:", index.lds['AVG_LD']
@@ -66,6 +69,8 @@ def search_trec(scorer):
         for docid, score in ranking:
             print "{} Q0 {} {} {} {}".format(topicid, docid, rank, score, scorer.name)
             rank += 1
+            if rank > top:
+                break
 
 
 if __name__ == '__main__':
