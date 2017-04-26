@@ -21,6 +21,7 @@ import re
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from nltk.stem.lancaster import LancasterStemmer
 
 import settings
 from scorer import TFIDF
@@ -40,10 +41,13 @@ class Index(object):
                  lem=True, minToken=4, removeStopwords=True):
         self.index = defaultdict(list)
         self.tokenizer = RegexpTokenizer(r'\w+')  # word-level tokenizer
-        self.lemmatizer = WordNetLemmatizer()
         self.lower = lower
-        self.stem = stem
+        if stem:
+            self.stemmer = LancasterStemmer()
+        elif lem:
+            self.lemmatizer = WordNetLemmatizer()
         self.lem = lem
+        self.stem = stem
         self.minToken = minToken
         self.removeStopwords = removeStopwords
         # load pre-constructed index
@@ -80,9 +84,10 @@ class Index(object):
             tokens = [token for token in tokens if len(token) >= self.minToken]
         if self.removeStopwords:
             tokens = [token for token in tokens if token not in stopwords.words('english')]
-        if self.lem:
+        if self.stem:
+            tokens = [self.stemmer.stem(token) for token in tokens]
+        elif self.lem:
             tokens = [self.lemmatizer.lemmatize(token) for token in tokens]
-        # TODO stem ?
         return Counter(tokens)
 
     def create_index(self, path=None, limit=None, list_of_strings=None):

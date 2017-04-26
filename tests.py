@@ -49,8 +49,17 @@ class TestIndex(unittest.TestCase):
     def test_create_inv_index(self):
         index = Index()
         index.create_index(list_of_strings=DOCS)
-        print index.inv_index
+        # print index.inv_index
         assert 'coach' in index.inv_index
+        assert 'N_DOCS' in index.inv_index
+        print "Added", index.inv_index['N_DOCS'], "docs to the index"
+        assert index.inv_index['N_DOCS'] == len(DOCS)
+
+    def test_stemmer(self):
+        index = Index(stem=True)
+        index.create_index(list_of_strings=DOCS)
+        print index.inv_index
+        assert 'environ' in index.inv_index
         assert 'N_DOCS' in index.inv_index
         print "Added", index.inv_index['N_DOCS'], "docs to the index"
         assert index.inv_index['N_DOCS'] == len(DOCS)
@@ -99,7 +108,7 @@ class TestIndex(unittest.TestCase):
         # verify tfidf ranking results
         scorer = BM25()
         print index.search(query, scorer)
-        # assert index.search(query, scorer) == {1: 0.0, 2: -0.004944249723978891}
+            # assert index.search(query, scorer) == {1: 0.0, 2: -0.004944249723978891}
 
 
 # class TestVSM():
