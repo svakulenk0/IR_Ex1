@@ -179,3 +179,5 @@ Document LA122590-0120 representation : []
 * [Python: Inverted Index for dummies](http://th30z.blogspot.co.at/2010/10/python-inverted-index-for-dummies.html)(https://github.com/matteobertozzi/blog-code/blob/master/py-inverted-index/invindex.py)
 
 * (http://www.nltk.org/_modules/nltk/tokenize.html)
+
+* [Least-squares fitting in Python](https://python4mpia.github.io/fitting_data/least-squares-fitting.html)
