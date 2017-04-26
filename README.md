@@ -1,4 +1,4 @@
-Exercise 1.4 - TF-IDF, BM25 & BM25Fs, and evaluation (85/100 points)
+Exercise 1.6 - TF-IDF, BM25 & BM25 ADPT, and evaluation (100/100 points)
 
 Advanced Information Retrieval 2017S
 
@@ -16,7 +16,9 @@ Advanced Information Retrieval 2017S
 
 (2) create a scorer that implements both TF-IDF and BM25 scoring functions
 
-(3) implement the change to BM25 as described in [the article published by Arjien P. de Vries et al. 2005 at SIGIR](http://homepages.cwi.nl/~arjen/pub/f330-devries.pdf)
+(3) implement the change to BM25 as described in [Yuanhua Lv and Cheng Xiang Zhai. Adaptive Term Frequency Normalization for BM25. CIKM 2011](http: //sifaka.cs.uiuc.edu/~ylv2/pub/cikm11-adptTF.pdf)
+
+[Arjien P. de Vries et al. SIGIR 2005](http://homepages.cwi.nl/~arjen/pub/f330-devries.pdf)
 
 (4) evaluate your results using the CD4&5 of the TIPSTER collection dataset provided and [the trec eval program](https://github.com/usnistgov/trec_eval).
 
@@ -77,8 +79,7 @@ Here is a short example of a potential output for all the topics:
 
 You should provide an executable searcher.sh file that given the necessary parameters generates a ranked list as above.
 
-Your task is to modify your implementation of the BM25 scoring function and create a new similarity class called BM25Fs, which introduces the four different ways to calculate the IDF of a term (F1, F2, F3, and F4). For your experiments, you may fix the method to F1, but you have to expose it as a system property.. Repeat your search from above with BM25 and your newly implemented class as indicated in the evaluation section.
-
+Your task is to modify your implementation of the BM25 scoring function and create a new similarity class called BM25 ADPT, which adapts dynamically the parameter k1 of BM25. Repeat your search from above with BM25 and your newly implemented class as indicated in the evaluation section.
 
 ## Evaluation
 You must use trec eval to calculate the Mean Average Precision (MAP) of your result lists over the 50 topics provided. trec eval is a small C application, you have to compile it for your machine. In principle, you can use any C compiler (most Linux distributions already come with one), and just run the make command in the folder2.
