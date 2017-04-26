@@ -10,7 +10,6 @@ Advanced Information Retrieval 2017S
 
 * comprehend and apply advance scoring functions from research papers.
 
-
 # Tasks: 
 
 (1) index and search
@@ -45,7 +44,7 @@ The system then returns a list of documents ranked by a similarity function of y
 
 TF-IDF and BM25 scoring methods have to be implemented.
 
-The search engine must take as a parameter the topic file. You are provided with a set of 50 top- ics to search for. They are all in the dataset and have a simple SGML structure. Each topic is delimited by <TOP> tags and you are free to use all or part of their content in your search.
+The search engine must take as a parameter the topic file. You are provided with a set of 50 topics to search for. They are all in the dataset and have a simple SGML structure. Each topic is delimited by <TOP> tags and you are free to use all or part of their content in your search.
 
 Implement topic processing and the actual scoring/ranking as two separate tasks.
 
@@ -78,7 +77,7 @@ Here is a short example of a potential output for all the topics:
 
 You should provide an executable searcher.sh file that given the necessary parameters generates a ranked list as above.
 
-Your task is to modify your implementation of the BM25 scoring function and create a new similarity class called BM25L as in the paper, which introduces a parameter δ. For your experiments, you may fix the parameter to a standard value 0.5, but you have to expose it as a system property. Repeat your search from above with your newly implemented scoring function as indicated in the evaluation section.
+Your task is to modify your implementation of the BM25 scoring function and create a new similarity class called BM25Fs, which introduces the four different ways to calculate the IDF of a term (F1, F2, F3, and F4). For your experiments, you may fix the method to F1, but you have to expose it as a system property.. Repeat your search from above with BM25 and your newly implemented class as indicated in the evaluation section.
 
 
 ## Evaluation
@@ -122,15 +121,7 @@ Maximum size: 4 pages or 2000 words.
 
 General knowledge about the system (e.g. what a tokenizer is, which stemmer have you used, how to change it, how to change the scoring function, what are the language-specific features).
 
-• All the source code must be uploaded on a public Git and the coordinators invited (lupu@ifs.tuwien.ac.at and lipani@ifs.tuwien.ac.at);
-
-• Prototypes are presented to the coordinator in one of the labs;
-
 • Final deadline is April 28th: upload a zipped file to TUWEL (report, source code, and corresponding executable jar file incl. all dependencies);
-
-• You must book a time on TUWEL for the presentation;
-
-• You present on your own notebook to the coordinator in the lab;
 
 • Lab locations are on TISS.
 
@@ -142,8 +133,41 @@ Note: 35 points to pass the course.
 
 ## Dependencies
 
-* nltk
+* nltk, download corpora/stopwords and wordnet resources:
 
+python 
+import nltk
+nltk.download()
+d
+stopwords
+wordnet
+
+http://blog.nlpapi.co/how-to-install-nltk-corporastopwords/
+
+## Usage:
+
+1. Download and unzip the TREC-8 collection:
+
+lswget *URL-of-the-dataset*
+unzip TREC8all.zip
+tar xvjf TREC8Adhoc.tar.bz2
+
+2. Run unittests: python tests.py
+
+3. Index the TREC-8 collection: python index.py
+
+4. Search topics in the index: 
+python search.py > ./results/results_bm25
+python search.py > ./results/results_tfidf
+
+# Results
+
+Indexed: 211349 docs
+
+## Errors (TODO)
+
+* Parsing error for latimes folder:
+Document LA122590-0120 representation : []
 
 
 # References
