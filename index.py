@@ -12,6 +12,8 @@ build an inverted index to search document collection.
 
 '''
 import os
+import argparse
+
 import pickle
 from collections import defaultdict, Counter
 import operator
@@ -241,11 +243,12 @@ class Index(object):
         # return answer_set
 
 
-def parse_trec8(limit):
+def parse_trec8(path=settings.TREC8_DOCS_PATH, limit=None, low=True, stem=False,
+                lem=True, minchar=4, stopw=True):
     # create new index of the TREC8 collection
-    index = Index()
+    index = Index(lower=low, stem=stem, lem=lem, minToken=minchar, removeStopwords=stopw)
     # load collection and store into index
-    index.create_index(path=settings.TREC8_DOCS_PATH, limit=limit)
+    index.create_index(path, limit)
     # index.create_index(path=settings.TREC8_DOCS_PATH + '/latimes', limit=limit)
     # index.create_index(path=settings.TREC8_DOCS_PATH + '/fbis', limit=limit)
     # index.create_index(path=settings.TREC8_DOCS_PATH + '/ft', limit=limit)
@@ -255,4 +258,25 @@ def parse_trec8(limit):
 
 
 if __name__ == '__main__':
-    parse_trec8(limit=200)
+    # parse_trec8(limit=200)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-path', type=str, default=settings.TREC8_DOCS_PATH,
+                        help='specify path the document collection')
+    parser.add_argument('-lim', type=str, default='None',
+                        help='restrict the number of files to index for testing purposes, e.g. 200')
+    parser.add_argument('-low', type=settings.str2bool, default=True,
+                        help='lowercase')
+    parser.add_argument('-stem', type=settings.str2bool, default=False,
+                        help='apply stemming')
+    parser.add_argument('-lem', type=settings.str2bool, default=True,
+                        help='apply lemmatization')
+    parser.add_argument('-minchar', type=int, default=4,
+                        help='remove words with the number of characters less than MINCHAR')
+    parser.add_argument('-stopw', type=settings.str2bool, default=True,
+                        help='remove stopwords from the nltk list')
+
+    args = parser.parse_args()
+    print "Indexing parameters:", args
+    if args.lim != 'None':
+        args.lim = int(args.lim)
+    parse_trec8(args.path, args.lim, args.low, args.stem, args.lem, args.minchar, args.stopw)
