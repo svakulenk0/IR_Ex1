@@ -16,7 +16,7 @@ import unittest
 import settings
 from index import Index
 from vectorize import VSM
-from scorer import BM25, TFIDF
+from scorer import BM25, TFIDF, BM25_ADPT
 
 
 DOCS = ["""Niners head coach Mike Singletary will let Alex Smith remain his starting 
@@ -49,7 +49,7 @@ class TestIndex(unittest.TestCase):
     def test_create_inv_index(self):
         index = Index()
         index.create_index(list_of_strings=DOCS)
-        # print index.inv_index
+        print index.inv_index
         assert 'coach' in index.inv_index
         assert 'N_DOCS' in index.inv_index
         print "Added", index.inv_index['N_DOCS'], "docs to the index"
@@ -96,7 +96,8 @@ class TestIndex(unittest.TestCase):
         query = 'television state'
         # verify tfidf ranking results
         scorer = TFIDF()
-        print index.search(query, scorer)
+        # print index.search(query, scorer)
+        assert index.search(query, scorer) == [('FBIS3-51', 5.493061443340549), ('FBIS3-50', -1.0986122886681098)]
 
     def test_search_bm25(self):
         # use the pre-computed index of the TREC8 collection
@@ -107,9 +108,20 @@ class TestIndex(unittest.TestCase):
         query = 'television state'
         # verify tfidf ranking results
         scorer = BM25()
-        print index.search(query, scorer)
-            # assert index.search(query, scorer) == {1: 0.0, 2: -0.004944249723978891}
+        # print index.search(query, scorer)
+        assert index.search(query, scorer) == [('FBIS3-51', 1.491323635149336e-05), ('FBIS3-50', -0.000498870351770098)]
 
+    # def test_search_bm25_adpt(self):
+    #     # use the pre-computed index of the TREC8 collection
+    #     index = Index(settings.INDEX_PATH, settings.LENGTH_PATH)
+    #     # make sure doc length dict is loaded
+    #     assert index.lds
+    #     # search index
+    #     query = 'television state'
+    #     # verify tfidf ranking results
+    #     scorer = BM25_ADPT()
+    #     print index.search(query, scorer)
+        # assert index.search(query, scorer) == [('FBIS3-51', 1.491323635149336e-05), ('FBIS3-50', -0.000498870351770098)]
 
 # class TestVSM():
 #     def test_vectorize(self):
