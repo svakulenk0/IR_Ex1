@@ -46,12 +46,12 @@ from index import Index
 from scorer import TFIDF, BM25, BM25_ADPT
 
 
-def search_trec(scorer, top=1000, topic_limit=-1):
+def search_trec(scorer, top=1000, topic_path=settings.TREC8_TOPICS_PATH):
     '''
     top <int> number of best scored docs returned
     '''
     # parse topics/queries
-    topics = parse_topics(settings.TREC8_TOPICS_PATH)  #[:topic_limit]
+    topics = parse_topics(topic_path)  #[:topic_limit]
     # print topics
     # load inverted index
     index = Index(settings.INDEX_PATH, settings.LENGTH_PATH)
@@ -87,14 +87,14 @@ if __name__ == '__main__':
     #                     help='restrict the number of topics (queries) for testing purposes, e.g. 2')
     parser.add_argument('-top', type=int, default=1000,
                         help='number of the top ranked documents to return for each of the topics')
-    # parser.add_argument('-stem', type=settings.str2bool, default=False,
-    #                     help='apply stemming')
-    # parser.add_argument('-lem', type=settings.str2bool, default=True,
-    #                     help='apply lemmatization')
-    # parser.add_argument('-minchar', type=int, default=4,
-    #                     help='remove words with the number of characters less than MINCHAR')
-    # parser.add_argument('-stopw', type=settings.str2bool, default=True,
-    #                     help='remove stopwords from the nltk list')
+    parser.add_argument('-tpath', type=str, default=settings.TREC8_TOPICS_PATH,
+                        help='specify path to the TREC topics file')
+    parser.add_argument('-k3', type=float, default=1000,
+                        help='hyper-parameter for BM25')
+    parser.add_argument('-k1', type=float, default=1.2,
+                        help='hyper-parameter for BM25')
+    parser.add_argument('-b', type=float, default=0.75,
+                        help='hyper-parameter for BM25')
 
     args = parser.parse_args()
     # print "Search parameters:", args
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     if scorer_string == 'tfidf':
         scorer = TFIDF()
     elif scorer_string == 'bm25':
-        scorer = BM25()
+        scorer = BM25(args.k3, args.k1, args.b)
     elif scorer_string == 'bm25adpt':
-        scorer = BM25_ADPT()
-    search_trec(scorer, args.top)
+        scorer = BM25_ADPT(args.k3, args.b)
+    search_trec(scorer, args.top, args.tpath)
