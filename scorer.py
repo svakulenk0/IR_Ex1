@@ -51,7 +51,7 @@ class Scorer(object):
                 # # self.tfqw[term] = tfq / float(self.k3 + tfq)
                 #     # calculate term-specific k1
                     self.k1[term] = self.estimate_k1(posting, n_docs)
-                    print term, self.k1[term]
+                    # print term, self.k1[term]
 
         for docid, tf in posting.items():
             # skip non-document placeholder for df

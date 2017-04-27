@@ -157,9 +157,11 @@ tar xvjf TREC8Adhoc.tar.bz2
 
 3. Index the TREC-8 collection: python index.py
 
-4. Search topics in the index: 
-python search.py > ./results/results_bm25
+4. Search topics in the index:
+
 python search.py > ./results/results_tfidf
+python search.py > ./results/results_bm25
+python search.py > ./results/results_bm25_adpt
 
 # Results
 
@@ -167,7 +169,7 @@ Indexed: 211349 docs
 
 ## Errors (TODO)
 
-* Parsing error for latimes folder:
+* Parsing:
 Document LA122590-0120 representation : []
 
 

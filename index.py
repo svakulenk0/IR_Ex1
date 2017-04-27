@@ -217,7 +217,7 @@ class Index(object):
         # print doc_has_term
         # initialize the ranking
         scorer.ranking = {}
-        # scorer = scoring_function()
+        # interate over terms in the query
         for term, tfq in terms.items():
             # print term
             # skip terms that are not indexed
@@ -246,9 +246,13 @@ def parse_trec8(limit):
     index = Index()
     # load collection and store into index
     index.create_index(path=settings.TREC8_DOCS_PATH, limit=limit)
+    # index.create_index(path=settings.TREC8_DOCS_PATH + '/latimes', limit=limit)
+    # index.create_index(path=settings.TREC8_DOCS_PATH + '/fbis', limit=limit)
+    # index.create_index(path=settings.TREC8_DOCS_PATH + '/ft', limit=limit)
+    # index.create_index(path=settings.TREC8_DOCS_PATH + '/fr94', limit=limit)
     index.store_dict(settings.INDEX_PATH, index.inv_index)
     index.store_dict(settings.LENGTH_PATH, index.lds)
 
 
 if __name__ == '__main__':
-    parse_trec8(limit=None)
+    parse_trec8(limit=200)

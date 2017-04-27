@@ -38,21 +38,21 @@ Here is a short example of a potential output for all the topics:
 import settings
 from trec_parser import parse_topics
 from index import Index
-from scorer import TFIDF, BM25
+from scorer import TFIDF, BM25, BM25_ADPT
 
 
-def search_trec(scorer, top=1000):
+def search_trec(scorer, top=1000, topic_limit=-1):
     '''
     top <int> number of best scored docs returned
     '''
     # parse topics/queries
-    topics = parse_topics(settings.TREC8_TOPICS_PATH)
+    topics = parse_topics(settings.TREC8_TOPICS_PATH)  #[:topic_limit]
     # print topics
     # load inverted index
     index = Index(settings.INDEX_PATH, settings.LENGTH_PATH)
     # print index.inv_index
     assert 'N_DOCS' in index.inv_index
-    print "Indexed:", index.inv_index['N_DOCS'], "docs"
+    # print "Indexed:", index.inv_index['N_DOCS'], "docs"
     assert index.inv_index['N_DOCS'] == len(index.lds) - 1
     assert 'AVG_LD' in index.lds
     # print "Average document length:", index.lds['AVG_LD']
@@ -63,7 +63,9 @@ def search_trec(scorer, top=1000):
     for desc, meta in topics:
         # print desc
         topicid = meta['qid']
+        # print desc
         ranking = index.search(desc, scorer)
+        
         # print ranking
         rank = 1
         for docid, score in ranking:
@@ -75,5 +77,5 @@ def search_trec(scorer, top=1000):
 
 if __name__ == '__main__':
     # scorer = TFIDF()
-    scorer = BM25()
-    search_trec(scorer)
+    scorer = BM25_ADPT()
+    search_trec(scorer, topic_limit=1)
