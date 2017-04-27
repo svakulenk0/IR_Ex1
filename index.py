@@ -261,7 +261,7 @@ if __name__ == '__main__':
     # parse_trec8(limit=200)
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-path', type=str, default=settings.TREC8_DOCS_PATH,
-                        help='specify path the document collection')
+                        help='specify path to the document collection')
     parser.add_argument('-lim', type=str, default='None',
                         help='restrict the number of files to index for testing purposes, e.g. 200')
     parser.add_argument('-low', type=settings.str2bool, default=True,
