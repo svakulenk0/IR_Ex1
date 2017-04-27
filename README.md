@@ -187,3 +187,5 @@ Document LA122590-0120 representation : []
 * (http://www.nltk.org/_modules/nltk/tokenize.html)
 
 * [Least-squares fitting in Python](https://python4mpia.github.io/fitting_data/least-squares-fitting.html)
+
+* [Argbash online: generate script](https://argbash.io/generate)
