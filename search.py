@@ -97,7 +97,7 @@ if __name__ == '__main__':
     #                     help='remove stopwords from the nltk list')
 
     args = parser.parse_args()
-    print "Search parameters:", args
+    # print "Search parameters:", args
     scorer_string = args.scorer.lower()
     if scorer_string == 'tfidf':
         scorer = TFIDF()
