@@ -34,7 +34,12 @@ Here is a short example of a potential output for all the topics:
 ...
 450 Q0 LA043089-0083 1000 0.08848727 grp5-exp1
 
+command line interface (CLI): provide search parameters and a file with a topic to search for.
+
+
 '''
+import argparse
+
 import settings
 from trec_parser import parse_topics
 from index import Index
@@ -63,7 +68,6 @@ def search_trec(scorer, top=1000, topic_limit=-1):
     for desc, meta in topics:
         # print desc
         topicid = meta['qid']
-        # print desc
         ranking = index.search(desc, scorer)
         
         # print ranking
@@ -76,6 +80,29 @@ def search_trec(scorer, top=1000, topic_limit=-1):
 
 
 if __name__ == '__main__':
-    # scorer = TFIDF()
-    scorer = BM25_ADPT()
-    search_trec(scorer, topic_limit=1)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-scorer', type=str, default='tfidf',
+                        help='specify scoring function to use: tfidf, bm25 or bm25adpt')
+    # parser.add_argument('-lim', type=str, default='None',
+    #                     help='restrict the number of topics (queries) for testing purposes, e.g. 2')
+    parser.add_argument('-top', type=int, default=1000,
+                        help='number of the top ranked documents to return for each of the topics')
+    # parser.add_argument('-stem', type=settings.str2bool, default=False,
+    #                     help='apply stemming')
+    # parser.add_argument('-lem', type=settings.str2bool, default=True,
+    #                     help='apply lemmatization')
+    # parser.add_argument('-minchar', type=int, default=4,
+    #                     help='remove words with the number of characters less than MINCHAR')
+    # parser.add_argument('-stopw', type=settings.str2bool, default=True,
+    #                     help='remove stopwords from the nltk list')
+
+    args = parser.parse_args()
+    print "Search parameters:", args
+    scorer_string = args.scorer.lower()
+    if scorer_string == 'tfidf':
+        scorer = TFIDF()
+    elif scorer_string == 'bm25':
+        scorer = BM25()
+    elif scorer_string == 'bm25adpt':
+        scorer = BM25_ADPT()
+    search_trec(scorer, args.top)
