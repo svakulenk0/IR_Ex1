@@ -155,13 +155,88 @@ tar xvjf TREC8Adhoc.tar.bz2
 
 2. Run unittests: python tests.py
 
-3. Index the TREC-8 collection: python index.py
+3. Index the TREC-8 collection
+
+python index.py -h
+usage: index.py [-h] [-path PATH] [-lim LIM] [-low LOW] [-stem STEM]
+                [-lem LEM] [-minchar MINCHAR] [-stopw STOPW]
+
+optional arguments:
+  -h, --help        show this help message and exit
+  -path PATH        specify path to the document collection (default:
+                    TREC8all/Adhoc)
+  -lim LIM          restrict the number of files to index for testing
+                    purposes, e.g. 200 (default: None)
+  -low LOW          lowercase (default: True)
+  -stem STEM        apply stemming (default: False)
+  -lem LEM          apply lemmatization (default: True)
+  -minchar MINCHAR  remove words with the number of characters less than
+                    MINCHAR (default: 4)
+  -stopw STOPW      remove stopwords from the nltk list (default: True)
+
+Examples: 
+(1) Run with the default parameters:
+python index.py
+Indexing parameters: Namespace(lem=True, lim='None', low=True, minchar=4, path='TREC8all/Adhoc', stem=False, stopw=True)
+Document FBIS3-50 representation : [('defense', 10), ('association', 6), ('industry', 6)]
+Document FBIS3-51 representation : [('television', 13), ('state', 8), ('yakovlev', 5)]
+Document FBIS3-52 representation : [('report', 27), ('annual', 27), ('1992', 26)]
+…
+ (2) Switch off lower-casing and take only the first 10 documents:
+python index.py -lim 10 -low false
+Indexing parameters: Namespace(lem=True, lim='10', low=False, minchar=4, path='TREC8all/Adhoc', stem=False, stopw=True)
+Document FBIS3-50 representation : [('defense', 8), ('JADI', 5), ('association', 4)]
+Document FBIS3-51 representation : [('television', 10), ('state', 7), ('Yakovlev', 5)]
+Document FBIS3-52 representation : [('annual', 27), (u'report', 26), ('1992', 26)]
+Document FBIS3-53 representation : [('China', 28), ('March', 23), ('Secretary', 23)]
+Document FBIS3-54 representation : [('WATAN', 10), ('reportedly', 8), ('Mourad', 7)]
+Document FBIS3-55 representation : [('Meciar', 28), ('March', 17), ('coalition', 14)]
+.…
+Document FBIS3-59 representation : [('Participating', 23), ('Mongolian', 14), ('BBHK', 13)]
+
+
 
 4. Search topics in the index:
 
-python search.py > ./results/results_tfidf
-python search.py > ./results/results_bm25
-python search.py > ./results/results_bm25_adpt
+python search.py -h
+usage: search.py [-h] [-scorer SCORER] [-top TOP] [-tpath TPATH] [-k3 K3]
+                 [-k1 K1] [-b B]
+
+optional arguments:
+  -h, --help      show this help message and exit
+  -scorer SCORER  specify scoring function to use: tfidf, bm25 or bm25adpt
+                  (default: tfidf)
+  -top TOP        number of the top ranked documents to return for each of the
+                  topics (default: 1000)
+  -tpath TPATH    specify path to the TREC topics file (default:
+                  TREC8all/topicsTREC8Adhoc.txt)
+  -k3 K3          hyper-parameter for BM25 (default: 1000)
+  -k1 K1          hyper-parameter for BM25 (default: 1.2)
+  -b B            hyper-parameter for BM25 (default: 0.75)
+
+Examples: 
+(1) Run with the default parameters:
+python search.py
+Search parameters: Namespace(b=0.75, k1=1.2, k3=1000, scorer='tfidf', top=1000, tpath='TREC8all/topicsTREC8Adhoc.txt')
+
+(2) Use BM25 scoring function and modify one of the default hyper-parameter values:
+python search.py -scorer bm25 -b 0.5
+Search parameters: Namespace(b=0.5, k1=1.2, k3=1000, scorer='bm25', top=1000, tpath='TREC8all/topicsTREC8Adhoc.txt')
+
+
+The search ranking results are returned in the standard TREC format, e.g.:
+401 Q0 FBIS3-57 1 6.80943129247 tfidf
+401 Q0 FBIS3-53 2 3.97605077024 tfidf
+401 Q0 FBIS3-55 3 2.21417413565 tfidf
+401 Q0 FBIS3-56 4 1.73460105539 tfidf
+401 Q0 FBIS3-54 5 1.09861228867 tfidf
+401 Q0 FBIS3-52 6 0.0 tfidf
+....
+450 Q0 FBIS3-54 4 0.93191827354 tfidf
+450 Q0 FBIS3-53 5 0.0170271220198 tfidf
+450 Q0 FBIS3-50 6 -0.401341390924 tfidf
+450 Q0 FBIS3-59 7 -2.00670695462 tfidf
+
 
 # Results
 
