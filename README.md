@@ -165,7 +165,11 @@ python search.py > ./results/results_bm25_adpt
 
 # Results
 
-Indexed: 211349 docs
+1st run
+Indexed: 211,349 docs
+
+2nd run (improved parsing: partial fix for 2 folders):
+Indexed: 266,979 docs
 
 ## Errors (TODO)
 
